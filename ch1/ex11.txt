@@ -1,0 +1,9 @@
+Question: How would you test the word count program? What kind of inputs are
+most likely to uncover bugs, if any?
+
+Answer: Create unit tests. Corner-cases are most likely to cause errors. This
+could beinputs with:
+  No words (blanks, tabs, newlines),
+  Large amount of words (tricker an overflow?),
+  Only non-words,
+  One word, but no non-words.
