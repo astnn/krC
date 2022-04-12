@@ -53,7 +53,7 @@ int my_getline(char s[], int lim) {
   }
 
   // Zero terminate string
-  if(i < lim-1) {
+  if(i < lim) {
     s[i] = '\0';
   } else {
     s[lim-1] = '\0';
