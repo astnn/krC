@@ -1,8 +1,8 @@
 Here is a normal line
-This line has three trailing blanks
-This line has ten trailing tabs
+This line has three trailing blanks   
+This line has ten trailing tabs                   
 The next line only has blanks
-
+                             
 The next line only has a newline
 
 End of test file
