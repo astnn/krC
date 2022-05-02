@@ -12,6 +12,8 @@ int main(void) {
   printf("%s corresponds to the integer %ld\n","1f",htoi("1f"));
   printf("%s corresponds to the integer %ld\n","0XFF",htoi("0XFF"));
   printf("%s corresponds to the integer %ld\n","0xa",htoi("0xa"));
+  printf("%s corresponds to the integer %ld\n","0xFFFF\\n",htoi("0xFFFF\n"));
+  printf("%s corresponds to the integer %ld\n","0xfisk",htoi("0xfisk"));
   
   return 0;
 }
