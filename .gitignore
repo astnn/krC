@@ -1,5 +1,11 @@
-#Pdfs
+####Pdfs
 *.pdf
 
-#Executables
+####Executables
 *.out
+# Ignore pcalc binary, but allow directory:
+pcalc
+!pcalc/
+
+####Object files
+*.o
