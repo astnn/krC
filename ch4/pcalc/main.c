@@ -16,9 +16,12 @@ the modulus operator and provisions for negative numbers. */
 
 
 int main(void) {
-  int type;
+  int type, noprint = 0;
   double op2;
   char s[MAXOP];
+  
+  printf(">>Polish calculator<<\nSpecial commands:\t?: see top of stack,"
+    "\t#: duplicate top of stack,\t\\: swap two latest numbers,\t!: clear stack\n" );
   
   while((type = getop(s)) != EOF) {
     switch(type) {
@@ -47,8 +50,29 @@ int main(void) {
         op2 = pop();
         push( (long) pop() % (long) op2);
         break;
+      case '?':
+        look();
+        noprint++;
+        break;
+      case '#':
+        duplicate();
+        noprint++;
+        break;
+      case '\\':
+        swap();
+        noprint++;
+        break;
+      case '!':
+        clear();
+        noprint++;
+        break;
       case '\n':
-        printf("\t%.8g\n", pop());
+        if (noprint == 0) {
+          printf("\t%.8g\n", pop());
+        } else {
+          noprint = 0;
+        }
+        
         break;
       default:
         printf("Error: Unknown command %s\n", s);
