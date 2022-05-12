@@ -7,16 +7,16 @@
 #include "stack.h"
 #include "getch.h"
 #include "getop.h"
-
-
-
-/* Given the basic framework it is straightforward to extend the calculator. Add
-the modulus operator and provisions for negative numbers. */
+#include "var.h"
 
 
 #define MAXOP 100 // Max size of operand or operator
 
+
+double lastval = 0.0; // Stores last printed output value
+
 void actonname(char s[]);
+
 
 
 int main(void) {
@@ -25,7 +25,8 @@ int main(void) {
   char s[MAXOP];
   
   printf(">>Polish calculator<<\nSpecial commands:\t?: see top of stack,"
-    "\t#: duplicate top of stack,\t\\: swap two latest numbers,\t!: clear stack\n" );
+    "\t#: duplicate top of stack,\t\\: swap two latest numbers,\t!: clear stack,"
+    "\nVariables can be assigned using the =varname notation\n\n");
   
   while((type = getop(s)) != EOF) {
     switch(type) {
@@ -34,6 +35,10 @@ int main(void) {
         break;
       case NAME:
         actonname(s);
+        break;
+      case '=':
+        storevar(s);
+        noprint++;
         break;
       case '+':
         push(pop() + pop());
@@ -71,11 +76,13 @@ int main(void) {
         break;
       case '!':
         clear();
+        clearvar();
         noprint++;
         break;
       case '\n':
         if (noprint == 0) {
-          printf("\t%.8g\n", pop());
+          lastval = pop();
+          printf("\t%.8g\n", lastval);
         } else {
           noprint = 0;
         }
@@ -92,6 +99,7 @@ int main(void) {
 
 void actonname(char s[]) {
   double op2;
+  int vp;
   
   if (strcmp(s, "sin") == 0) {
     push( sin( pop() ) );
@@ -100,7 +108,11 @@ void actonname(char s[]) {
   } else if (strcmp(s, "pow") == 0) {
     op2 = pop();
     push( pow( pop(), op2 ) );
+  } else if (strcmp(s, "r") == 0) {
+    push (lastval);
+  } else if ( (vp = checkvar(s)) != -1 ){
+    push( getvar(vp) );
   } else {
-    printf("Error: Command %s not recognised\n", s );
+    printf("Error: Command or variable %s not recognised\n", s );
   }
 }

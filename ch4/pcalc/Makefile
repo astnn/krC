@@ -4,13 +4,13 @@
 # Usage: call "make" in the directory to compile binary, or "make clean" to
 # remove binary and object files.
 BIN = pcalc
-SRC = main.c stack.c getch.c getop.c
+SRC = main.c stack.c getch.c getop.c var.c
 OBJ = $(SRC:.c=.o)
 HDR = $(SRC:.c=.h)
 
 CC = gcc
-CFLAGS = -Wall	#Compile flags: -Wall: Warnings all
-LDLIBS = -lm 		#Linked libraries: -lm: Link Math
+CFLAGS = -Wall
+LDLIBS = -lm
 
 all: $(BIN)
 

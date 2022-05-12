@@ -14,9 +14,21 @@ int getop(char s[]) {
   }
   s[1] = '\0';
   
-  // Check if an opereator excluding '-'
-  if (!isdigit(c) && !isalpha(c) && c != '.' && c != '-') {
+  // Check if an opereator excluding '-' and '='
+  if (!isdigit(c) && !isalpha(c) && c != '.' && c != '-' && c != '=') {
     return c; // Not a number
+  }
+  
+  // Check if '=' operator
+  if (c == '=') {
+    while (isalpha( s[i++] = c = getch() )) {
+      // No action
+    }
+    s[i-1] = '\0';
+    if (c != EOF) {
+      ungetch(c);
+    }
+    return '=';
   }
   
   // Check if a named command
