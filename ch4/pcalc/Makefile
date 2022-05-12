@@ -9,12 +9,13 @@ OBJ = $(SRC:.c=.o)
 HDR = $(SRC:.c=.h)
 
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall	#Compile flags: -Wall: Warnings all
+LDLIBS = -lm 		#Linked libraries: -lm: Link Math
 
 all: $(BIN)
 
 $(BIN): $(OBJ)
-	$(CC) -o $@ $(OBJ) $(CFLAGS)
+	$(CC) -o $@ $(OBJ) $(CFLAGS) $(LDLIBS)
 
 %.o: %.c $(HDR) # Note1
 	$(CC) -c $< $(CFLAGS)

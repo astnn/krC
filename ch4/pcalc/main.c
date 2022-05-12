@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> // For atof()
+#include <math.h>   // For sin, exp, and pow
+#include <string.h> // For strcmp
 
 #include "main.h"
 #include "stack.h"
@@ -14,6 +16,8 @@ the modulus operator and provisions for negative numbers. */
 
 #define MAXOP 100 // Max size of operand or operator
 
+void actonname(char s[]);
+
 
 int main(void) {
   int type, noprint = 0;
@@ -27,6 +31,9 @@ int main(void) {
     switch(type) {
       case NUMBER:
         push(atof(s));
+        break;
+      case NAME:
+        actonname(s);
         break;
       case '+':
         push(pop() + pop());
@@ -72,7 +79,6 @@ int main(void) {
         } else {
           noprint = 0;
         }
-        
         break;
       default:
         printf("Error: Unknown command %s\n", s);
@@ -81,4 +87,20 @@ int main(void) {
   }
   
   return 0;
+}
+
+
+void actonname(char s[]) {
+  double op2;
+  
+  if (strcmp(s, "sin") == 0) {
+    push( sin( pop() ) );
+  } else if (strcmp(s, "exp") == 0) {
+    push( exp( pop() ) );
+  } else if (strcmp(s, "pow") == 0) {
+    op2 = pop();
+    push( pow( pop(), op2 ) );
+  } else {
+    printf("Error: Command %s not recognised\n", s );
+  }
 }
