@@ -6,6 +6,9 @@
 # Ignore pcalc binary, but allow directory:
 pcalc
 !pcalc/
+# Ignore expr binary, but allow directory:
+expr
+!expr/
 
 ####Object files
 *.o

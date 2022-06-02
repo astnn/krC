@@ -1,0 +1,9 @@
+This exercise is solved in the folder ./ch5/expr/.
+
+It is an augmented version of the polish calculator as found in ./ch4/pcalc/.
+The main changes from the original pcalc is that input are read from the
+commandline arguments into a buffer, instead of being read from stdin. This is
+done as the first action in main.
+The buffered input is then passed to getch by calling the new getarg() instead
+of getchar().
+All new functions are stored in arghandler.c,
