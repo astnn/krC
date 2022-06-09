@@ -1,0 +1,11 @@
+WIP! Approx 50% done.
+
+I have opted to implement part of the GNU tail program, rather than the solution
+suggested in the exercise, as it has some interesting features such as:
+-Linked list of buffers based on structs,
+-Dynamic memory allocation,
+-Buffered read operations for efficiency,
+
+
+Original version:
+https://github.com/coreutils/coreutils/blob/master/src/tail.c
