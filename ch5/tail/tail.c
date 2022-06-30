@@ -26,10 +26,19 @@ tail for reading stdin:
 https://github.com/coreutils/coreutils/blob/master/src/tail.c: 627
 */
 
+/* TODO:
+-Fix todo with file not ending in newline
+-Error check when assigning memory (could be NULL!)
+-Consider using custom malloc and xwrite to build error handling into functions
+  -Can be based on xmalloc and xwrite from GNU tail.
+*/
+
 int main(int argc, char const *argv[]) {
-  size_t nlines;
+  size_t nlines; // No. lines to be printed
   size_t total_lines = 0;
   size_t n_read;
+  size_t nbytes;
+  int exit_status = EXIT_SUCCESS;
   
   LBUFFER *first, *last, *tmp;
   
@@ -52,7 +61,7 @@ int main(int argc, char const *argv[]) {
   
   while (TRUE) {
     
-    
+    // Read opto BUFSIZ chars into tmp->buffers, return number read
     n_read = fread(tmp->buffer, sizeof(char), BUFSIZ, stdin);
     if (n_read == 0) {
       break;
@@ -64,6 +73,7 @@ int main(int argc, char const *argv[]) {
     char const *p = tmp->buffer;
     char const *buffer_end = tmp->buffer + n_read;
     
+    // memchr: return pointer to first occurence of search char, or NULL
     while (p = (char *) memchr(p, '\n', buffer_end - p)) {
       p++;
       tmp->nlines++;
@@ -71,14 +81,14 @@ int main(int argc, char const *argv[]) {
     total_lines += tmp->nlines;
     
     /* If there is space in last buffer, read tmp data into that one, and re-use
-    in the next itteration */
+    tmp in the next itteration */
     if (BUFSIZ > last->nbytes + tmp->nbytes) {
-      memcpy(last->buffer[last->nbytes], tmp->buffer, tmp->nbytes);
+      memcpy(&last->buffer[last->nbytes], tmp->buffer, tmp->nbytes);
       last->nbytes += tmp->nbytes;
       last->nlines += tmp->nlines;
     } else {
-      /* If there are enough lines without first, re-use the memory for the next
-      tmp. Else malloc a new block. */
+      /* If there are enough lines without "first", re-use the memory for the
+      next tmp. Else malloc a new block. */
       last = last->next = tmp;
       if (total_lines - first->nlines > nlines) {
         tmp = first;
@@ -92,7 +102,50 @@ int main(int argc, char const *argv[]) {
   
   free(tmp);
   
+  // If file is empty, go to clean-up
+  if (last->nbytes = 0) {
+    goto free_lbuffers;
+  }
   
+  // If zero lines are to be printed, skip to end
+  if (nlines == 0) {
+    goto free_lbuffers;
+  }
+  
+  // If file does not end in newline
+  if (last->buffer[last->nbytes - 1] != '\n') {
+    // TODO
+  }
+  
+  // Skip over unneeded buffers
+  for (tmp = first; total_lines - tmp->nlines > nlines; tmp = tmp->next){
+    total_lines -= tmp->nlines;
+  }
+  
+  {
+    char const *p = tmp->buffer;
+    char const *buffer_end = tmp->buffer + n_read;
+    
+    while (total_lines > nlines) {
+      p = (char *) memchr(p, '\n', buffer_end - p);
+      p++;
+      total_lines--;
+    }
+    nbytes = buffer_end - p;
+    if (fwrite(p, sizeof(char), nbytes, stdout) < nbytes) {
+      fprintf(stderr, "Error writing to stdout");
+      exit_status = EXIT_FAILURE;
+      goto free_lbuffers;
+    }
+  }
+  
+  for (tmp = tmp->next; tmp; tmp = tmp->next) {
+    if (fwrite(tmp->buffer, sizeof(char), tmp->nbytes, stdout) < tmp->nbytes) {
+      fprintf(stderr, "Error writing to stdout");
+      exit_status = EXIT_FAILURE;
+      goto free_lbuffers;
+    }
+  }
   
   /* Pseudocode:
   Initialise first, last, allocate tmp
@@ -115,6 +168,7 @@ int main(int argc, char const *argv[]) {
   */
   
   /* Free memory from linked list */
+  free_lbuffers:
   while (first) {
     tmp = first;
     first = first->next;

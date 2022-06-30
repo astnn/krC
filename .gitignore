@@ -12,3 +12,9 @@ expr
 
 ####Object files
 *.o
+
+####Test files
+test.txt
+
+####Temporary ignores
+GNU_tail.c
