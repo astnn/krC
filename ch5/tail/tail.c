@@ -15,12 +15,6 @@ struct linebuffer {
 };
 typedef struct linebuffer LBUFFER;
 
-
-
-void usage(const char *progname);
-
-
-// look into fread vs read
 /* Implementing a slightly modified version of the pipe_lines function of GNU
 tail for reading stdin:
 https://github.com/coreutils/coreutils/blob/master/src/tail.c: 627
@@ -32,6 +26,30 @@ https://github.com/coreutils/coreutils/blob/master/src/tail.c: 627
 -Consider using custom malloc and xwrite to build error handling into functions
   -Can be based on xmalloc and xwrite from GNU tail.
 */
+
+/* Pseudocode:
+Initialise first, last, allocate tmp
+WHILE:
+  Initialise tmp
+  Read stdin into tmp
+  Count newlines just read
+  increment total lines
+    IF space in last buffer, append to that one
+    ELSE
+      IF enough lines are read, reuse first LBUFFER
+      ELSE malloc new at end of list
+  Free tmp
+  Check for empty list
+  -->Check if stdin ends on newline or not. Disregard empty newline
+  Skip unneeded buffers
+  Goto first line to be printed and print rest
+  Free buffers
+*/
+
+
+
+void usage(const char *progname);
+
 
 int main(int argc, char const *argv[]) {
   size_t nlines; // No. lines to be printed
@@ -70,15 +88,18 @@ int main(int argc, char const *argv[]) {
     tmp->nbytes = n_read;
     tmp->next = NULL;
     
-    char const *p = tmp->buffer;
-    char const *buffer_end = tmp->buffer + n_read;
-    
-    // memchr: return pointer to first occurence of search char, or NULL
-    while (p = (char *) memchr(p, '\n', buffer_end - p)) {
-      p++;
-      tmp->nlines++;
+    // Count number of newlines just read
+    {
+      char const *p = tmp->buffer;
+      char const *buffer_end = tmp->buffer + n_read;
+      // memchr: return pointer to first occurence of search char, or NULL
+      while (p = (char *) memchr(p, '\n', buffer_end - p)) {
+        p++;
+        tmp->nlines++;
+      }
+      total_lines += tmp->nlines;
     }
-    total_lines += tmp->nlines;
+    
     
     /* If there is space in last buffer, read tmp data into that one, and re-use
     tmp in the next itteration */
@@ -103,7 +124,7 @@ int main(int argc, char const *argv[]) {
   free(tmp);
   
   // If file is empty, go to clean-up
-  if (last->nbytes = 0) {
+  if (last->nbytes == 0) {
     goto free_lbuffers;
   }
   
@@ -122,9 +143,10 @@ int main(int argc, char const *argv[]) {
     total_lines -= tmp->nlines;
   }
   
+  // Find the correct place to start printing first buffer and print it
   {
     char const *p = tmp->buffer;
-    char const *buffer_end = tmp->buffer + n_read;
+    char const *buffer_end = tmp->buffer + tmp->nbytes;
     
     while (total_lines > nlines) {
       p = (char *) memchr(p, '\n', buffer_end - p);
@@ -139,6 +161,7 @@ int main(int argc, char const *argv[]) {
     }
   }
   
+  // Print remaining buffers
   for (tmp = tmp->next; tmp; tmp = tmp->next) {
     if (fwrite(tmp->buffer, sizeof(char), tmp->nbytes, stdout) < tmp->nbytes) {
       fprintf(stderr, "Error writing to stdout");
@@ -146,26 +169,6 @@ int main(int argc, char const *argv[]) {
       goto free_lbuffers;
     }
   }
-  
-  /* Pseudocode:
-  Initialise first, last, allocate tmp
-  WHILE:
-    Initialise tmp
-    Read stdin into tmp
-    Count newlines just read
-    increment total lines
-      IF space in last buffer, append to that one
-      ELSE
-        IF enough lines are read, reuse first LBUFFER
-        ELSE malloc new at end of list
-    Free tmp
-    -->Check for empty list
-    Check if stdin ends on newline or not. Disregard empty newline
-    Skip unneeded buffers
-    Goto first line to be printed and print rest
-    Free buffers
-    
-  */
   
   /* Free memory from linked list */
   free_lbuffers:
